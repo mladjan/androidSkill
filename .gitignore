@@ -10,14 +10,9 @@ tiktok_cookies.json
 *.db
 *.sqlite
 *.sqlite3
-data/database.db
 
 # Logs
-data/logs/*.log
 *.log
-
-# Browser profiles (contain session data)
-data/browser_profiles/*
 
 # Python
 __pycache__/
@@ -66,8 +61,12 @@ htmlcov/
 # Test files
 test_*.py
 
-# Data screenshots and logs
-data/*.png
-data/*.txt
+# Data directory (database, screenshots, logs, browser profiles)
+data/
+
+# Bot settings and config
 config.py
 .bot_settings.json
+
+# Claude Code
+.claude/
