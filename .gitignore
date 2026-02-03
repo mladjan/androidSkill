@@ -70,3 +70,4 @@ test_*.py
 data/*.png
 data/*.txt
 config.py
+.bot_settings.json

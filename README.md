@@ -88,33 +88,101 @@ Watches the bot:
 4. Post unique comments
 5. Generate report
 
-## Configuration
+## First-Time Setup
 
-### 1. Create your config file
+### Interactive Setup Wizard
+
+On first run, the bot will automatically launch an interactive setup wizard:
+
+```bash
+python3 tiktok_bot.py search --topics fitness --videos 5
+```
+
+**Or run setup manually:**
+
+```bash
+python3 setup.py
+```
+
+The wizard will ask you:
+
+1. **Topics** - What topics to engage with (e.g., fitness, cooking, travel)
+2. **Comment Style** - Choose between:
+   - **Static templates** - Fast, predefined comments (no API needed)
+   - **AI-generated** - Smart comments analyzing videos (requires API key)
+3. **Templates or AI config** - Depending on your choice:
+   - Static: Enter 6-8 comment variations per topic
+   - AI: Provide API key (Anthropic/OpenAI/OpenRouter) and choose model
+
+### Manual Configuration
+
+Alternatively, copy and edit the config:
 
 ```bash
 cp config.example.py config.py
+# Edit config.py
 ```
 
-### 2. Customize topics and comments
+## Comment Styles
 
-Edit `config.py` to add your topics and comment templates:
+### Static Templates (Fast, No API)
 
+Predefined comment templates for each topic. Fast and reliable.
+
+**Pros:**
+- No API costs
+- Instant comments
+- Full control over content
+- Works offline
+
+**Example config.py:**
 ```python
-TOPICS = [
-    "fitness",
-    "cooking",
-    "travel",
-    # Add your topics...
-]
+COMMENT_STYLE = "static"
 
 COMMENTS_BY_TOPIC = {
     "fitness": [
         "That form looks perfect! What's your workout routine?",
         "Impressive progress! How long have you been training?",
-        # 6-8 variations per topic...
+        # 6-8 variations...
     ]
 }
+```
+
+### AI-Generated (Smart, Contextual)
+
+Uses Claude Vision or GPT-4 Vision to analyze videos and generate contextual comments.
+
+**Pros:**
+- Smart, contextual comments
+- Analyzes actual video content
+- More natural and varied
+- Better engagement
+
+**Cons:**
+- Requires API key
+- ~$0.01-0.05 per comment
+- Slightly slower
+
+**Example config.py:**
+```python
+COMMENT_STYLE = "ai"
+AI_PROVIDER = "anthropic"  # or "openai" or "openrouter"
+AI_MODEL = "claude-3-5-sonnet-20241022"
+
+AI_COMMENT_PROMPT = """
+Analyze this video screenshot and generate a natural comment.
+Topic: {topic}
+Guidelines: 10-25 words, ask a question, no emojis.
+"""
+```
+
+**API key goes in .env:**
+```bash
+ANTHROPIC_API_KEY=sk-ant-...
+# or
+OPENAI_API_KEY=sk-...
+# or
+OPENROUTER_API_KEY=sk-or-v1-...
 ```
 
 ## Usage

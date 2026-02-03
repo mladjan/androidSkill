@@ -37,13 +37,42 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from src.bot.android.tiktok_android_bot import TikTokAndroidBot
 from src.bot.android.tiktok_navigation import TikTokNavigation
 
-# Try to import config, fall back to example if not found
+# Check if config exists
+if not os.path.exists("config.py"):
+    print("\n" + "="*60)
+    print("⚠️  Configuration not found!")
+    print("="*60)
+    print("\nThis is your first time running the bot.")
+    print("Let's set it up!\n")
+    
+    response = input("Run interactive setup now? [Y/n]: ").strip().lower()
+    if response in ['', 'y', 'yes']:
+        print("\nStarting setup wizard...\n")
+        os.system("python3 setup.py")
+        if not os.path.exists("config.py"):
+            print("\n❌ Setup was not completed. Exiting.")
+            sys.exit(1)
+        print("\n✅ Setup complete! Starting bot...\n")
+    else:
+        print("\n❌ Cannot run without configuration.")
+        print("   Run: python3 setup.py")
+        sys.exit(1)
+
+# Import config
 try:
-    from config import TOPICS, COMMENTS_BY_TOPIC, GENERIC_COMMENTS
-except ImportError:
-    print("⚠️  config.py not found. Using example configuration.")
-    print("   Copy config.example.py to config.py and customize it.\n")
-    from config.example import TOPICS, COMMENTS_BY_TOPIC, GENERIC_COMMENTS
+    from config import TOPICS, COMMENT_STYLE
+    
+    # Import based on comment style
+    if COMMENT_STYLE == "static":
+        from config import COMMENTS_BY_TOPIC, GENERIC_COMMENTS
+    else:  # AI mode
+        from config import AI_PROVIDER, AI_MODEL, AI_COMMENT_PROMPT, GENERIC_COMMENTS
+        from src.ai_comments import generate_ai_comment
+        
+except ImportError as e:
+    print(f"❌ Error loading config: {e}")
+    print("   Run: python3 setup.py")
+    sys.exit(1)
 
 
 def get_device_id(specified_device=None):
@@ -70,22 +99,56 @@ def get_device_id(specified_device=None):
     return devices[0]
 
 
-def get_unique_comment(topic, used_comments, comments_dict):
-    """Get a unique comment for the topic."""
-    if topic not in comments_dict:
+def get_comment_static(topic, used_comments):
+    """Get a static comment from templates."""
+    if topic not in COMMENTS_BY_TOPIC:
         # Fall back to generic comments
         available = [c for c in GENERIC_COMMENTS if c not in used_comments]
     else:
-        available = [c for c in comments_dict[topic] if c not in used_comments]
+        available = [c for c in COMMENTS_BY_TOPIC[topic] if c not in used_comments]
     
     if not available:
         # All used, reset
         used_comments.clear()
-        available = comments_dict.get(topic, GENERIC_COMMENTS)
+        available = COMMENTS_BY_TOPIC.get(topic, GENERIC_COMMENTS)
     
     comment = random.choice(available)
     used_comments.add(comment)
     return comment
+
+
+def get_comment_ai(screenshot_path, topic):
+    """Generate comment using AI vision."""
+    try:
+        comment = generate_ai_comment(
+            screenshot_path=screenshot_path,
+            topic=topic,
+            provider=AI_PROVIDER,
+            model=AI_MODEL,
+            prompt_template=AI_COMMENT_PROMPT
+        )
+        
+        if comment:
+            return comment
+        else:
+            # Fall back to generic
+            return random.choice(GENERIC_COMMENTS)
+    except Exception as e:
+        print(f"    ⚠️  AI failed, using fallback: {e}")
+        return random.choice(GENERIC_COMMENTS)
+
+
+def get_comment(topic, screenshot_path=None, used_comments=None):
+    """Get comment based on configured style."""
+    if COMMENT_STYLE == "ai":
+        if not screenshot_path:
+            print("    ⚠️  No screenshot for AI, using fallback")
+            return random.choice(GENERIC_COMMENTS)
+        return get_comment_ai(screenshot_path, topic)
+    else:  # static
+        if used_comments is None:
+            used_comments = set()
+        return get_comment_static(topic, used_comments)
 
 
 def search_mode(bot, nav, topics, videos_per_topic, device_id):
@@ -140,8 +203,17 @@ def search_mode(bot, nav, topics, videos_per_topic, device_id):
                 nav.tap_video_from_grid(position)
                 time.sleep(2)
                 
-                # Generate and post comment
-                comment = get_unique_comment(topic, used_comments, COMMENTS_BY_TOPIC)
+                # Take screenshot for AI analysis
+                screenshot_path = f"data/search_{topic}_v{video_num}.png"
+                bot.take_screenshot(screenshot_path)
+                
+                # Generate comment (AI or static)
+                if COMMENT_STYLE == "ai":
+                    print(f"    🤖 Analyzing video with AI...")
+                    comment = get_comment(topic, screenshot_path=screenshot_path)
+                else:
+                    comment = get_comment(topic, used_comments=used_comments)
+                
                 print(f"    💬 {comment}")
                 
                 success = bot.post_comment(comment)
@@ -196,10 +268,16 @@ def explore_mode(bot, nav, num_videos, device_id):
         
         try:
             # Take screenshot
-            bot.take_screenshot(f"data/explore_v{video_num}.png")
+            screenshot_path = f"data/explore_v{video_num}.png"
+            bot.take_screenshot(screenshot_path)
             
-            # Generate generic comment
-            comment = get_unique_comment(None, used_comments, {})
+            # Generate comment (AI or generic)
+            if COMMENT_STYLE == "ai":
+                print(f"  🤖 Analyzing video with AI...")
+                comment = get_comment("general", screenshot_path=screenshot_path)
+            else:
+                comment = get_comment(None, used_comments=used_comments)
+            
             print(f"  💬 {comment}")
             
             # Post comment
