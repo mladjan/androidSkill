@@ -1,6 +1,6 @@
 ---
 name: tiktok-android-bot
-description: Automate TikTok engagement on Android using ADB (Android Debug Bridge). Search any topics, analyze videos with AI or use templates, post contextual comments. Includes interactive setup wizard. Use when you need to run TikTok automation campaigns, build social presence through strategic commenting, or engage with specific communities on Android TikTok.
+description: Automate TikTok engagement on Android using ADB. Search topics, comment with AI or templates, includes setup wizard. Use for TikTok automation campaigns and building social presence through strategic commenting.
 ---
 
 # TikTok Android Bot
