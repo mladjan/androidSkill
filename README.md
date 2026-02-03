@@ -88,32 +88,89 @@ Watches the bot:
 4. Post unique comments
 5. Generate report
 
+## Configuration
+
+### 1. Create your config file
+
+```bash
+cp config.example.py config.py
+```
+
+### 2. Customize topics and comments
+
+Edit `config.py` to add your topics and comment templates:
+
+```python
+TOPICS = [
+    "fitness",
+    "cooking",
+    "travel",
+    # Add your topics...
+]
+
+COMMENTS_BY_TOPIC = {
+    "fitness": [
+        "That form looks perfect! What's your workout routine?",
+        "Impressive progress! How long have you been training?",
+        # 6-8 variations per topic...
+    ]
+}
+```
+
 ## Usage
 
-### Single Topic (3 videos)
+The bot has **two modes**:
+
+### Search Mode - Target Specific Topics
+
+Search for specific topics and comment on related videos:
 
 ```bash
+# Single topic, 5 videos
+python3 tiktok_bot.py search --topics fitness --videos 5
+
+# Multiple topics, 3 videos each
+python3 tiktok_bot.py search --topics "fitness,cooking,travel" --videos 3
+
+# With specific device
+python3 tiktok_bot.py search --topics gaming --videos 5 --device 001431538002547
+```
+
+**What it does:**
+1. Searches each topic
+2. Opens videos from search results grid
+3. Posts contextual comments from your templates
+4. Prevents duplicate comments on same video
+
+### Explore Mode - For You Feed
+
+Scroll through For You feed and comment on random videos:
+
+```bash
+# Comment on 10 random videos
+python3 tiktok_bot.py explore --videos 10
+
+# With specific device
+python3 tiktok_bot.py explore --videos 5 --device 001431538002547
+```
+
+**What it does:**
+1. Starts on For You feed
+2. Comments on current video
+3. Scrolls to next video
+4. Uses generic comments (not topic-specific)
+
+### Legacy Scripts
+
+For backwards compatibility, old scripts still work:
+
+```bash
+# Full campaign (uses hardcoded car topics)
+python3 run_full_campaign.py
+
+# Single session (uses hardcoded car topics)
 python3 run_complete_session.py
 ```
-
-### Full Campaign (25 videos)
-
-```bash
-python3 run_full_campaign.py
-```
-
-Engages with 5 topics × 5 videos:
-- dragy (GPS timing)
-- laptimer (lap timing)
-- circuit (race tracks)
-- acceleration (drag racing)
-- trackday (track events)
-
-**Results:**
-- 25/25 videos commented (100% success)
-- ~13-15 minutes total
-- ~31.7 seconds per video
-- All unique comments
 
 ### Schedule Daily
 
@@ -123,7 +180,7 @@ openclaw cron add \
   --name "Daily TikTok" \
   --schedule "0 10 * * *" \
   --tz "Europe/Madrid" \
-  --payload '{"kind":"agentTurn","message":"Run TikTok campaign"}'
+  --payload '{"kind":"agentTurn","message":"cd /path/to/androidSkill && python3 tiktok_bot.py search --topics fitness,gaming --videos 5"}'
 ```
 
 ## Project Structure
@@ -141,23 +198,7 @@ androidSkill/
 └── data/                                # Screenshots & logs (gitignored)
 ```
 
-## Configuration
-
-### Topics & Comments
-
-Edit `run_full_campaign.py`:
-
-```python
-TOPICS = ["dragy", "laptimer", "circuit", "acceleration", "trackday"]
-
-COMMENTS_BY_TOPIC = {
-    "dragy": [
-        "That 60ft time is insane! What mods are you running?",
-        "Dragy never lies! What was the trap speed?",
-        # 6 more variations...
-    ]
-}
-```
+## Advanced Configuration
 
 ### Device Coordinates
 

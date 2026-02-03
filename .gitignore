@@ -69,3 +69,4 @@ test_*.py
 # Data screenshots and logs
 data/*.png
 data/*.txt
+config.py
