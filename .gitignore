@@ -62,3 +62,10 @@ playwright/.browsers/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Test files
+test_*.py
+
+# Data screenshots and logs
+data/*.png
+data/*.txt

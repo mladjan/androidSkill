@@ -293,11 +293,20 @@ class TikTokAndroidBot:
             self._type_text(comment_text)
             time.sleep(1)
 
-            # Step 4: Submit comment (Post/Send button on RIGHT side of input)
-            send_button_x = int(width * 0.88)  # Right side
-            send_button_y = int(height * 0.93)  # Same level as input
+            # Step 4: Dismiss keyboard (so Post button is at consistent position)
+            log.debug("[Android Bot] Dismissing keyboard...")
+            self._press_key("KEYCODE_BACK")
+            time.sleep(1)  # Wait for keyboard to hide
 
-            log.debug("[Android Bot] Tapping Post button...")
+            # Step 5: Submit comment (Post/Send button with keyboard DISMISSED)
+            # With keyboard dismissed, button is at consistent distance from bottom
+            # Tested and verified position on device 1080x2392
+            send_button_x = int(width * 0.92)  # 92% from left edge (right side)
+            # Calculate Y as fixed distance from BOTTOM (not percentage from top)
+            pixels_from_bottom = 130  # Post button is 130px from bottom (verified)
+            send_button_y = height - pixels_from_bottom
+
+            log.debug(f"[Android Bot] Tapping Post button at ({send_button_x}, {send_button_y}) - {pixels_from_bottom}px from bottom...")
             self._tap(send_button_x, send_button_y)
             time.sleep(2)  # Wait for comment to post
 
