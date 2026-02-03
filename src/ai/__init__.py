@@ -1,1 +1,0 @@
-"""AI comment generation module."""
