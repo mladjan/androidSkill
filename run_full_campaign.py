@@ -8,6 +8,8 @@ from src.bot.android.tiktok_android_bot import TikTokAndroidBot
 from src.bot.android.tiktok_navigation import TikTokNavigation
 import time
 import random
+import os
+import subprocess
 from datetime import datetime
 
 # All car/racing topics
@@ -239,7 +241,18 @@ def main():
     print(f"Total videos: {len(TOPICS) * 5}")
     print("="*60)
     
-    device_id = "001431538002547"
+    # Get device ID from environment or use first connected device
+    device_id = os.environ.get("ANDROID_DEVICE_ID")
+    if not device_id:
+        # Auto-detect first connected device
+        result = subprocess.run(["adb", "devices"], capture_output=True, text=True)
+        devices = [line.split()[0] for line in result.stdout.split("\n")[1:] if line.strip() and "device" in line]
+        if not devices:
+            print("❌ No Android device found. Connect device and enable USB debugging.")
+            return
+        device_id = devices[0]
+        print(f"📱 Using device: {device_id}")
+    
     bot = TikTokAndroidBot(device_id=device_id)
     nav = TikTokNavigation(bot)
     
