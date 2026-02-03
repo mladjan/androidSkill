@@ -1,0 +1,64 @@
+# Environment
+.env
+*.env
+!.env.example
+
+# Cookies / session data
+tiktok_cookies.json
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+data/database.db
+
+# Logs
+data/logs/*.log
+*.log
+
+# Browser profiles (contain session data)
+data/browser_profiles/*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Playwright
+playwright/.browsers/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
